@@ -1,3 +1,11 @@
+# -*- encoding: utf-8 -*-
+'''
+@Time    :   2024-01-25 01:05:35
+@desc    :   simple chatbot
+@Author  :   ticoAg
+@Contact :   1627635056@qq.com
+'''
+
 import os
 import time
 from openai import OpenAI
