@@ -15,5 +15,5 @@ export OPENAI_BASE_URL=https://api.openai.com/v1
 
 ### 3. run the app
 ```
-streamlit run ChatBot.py
+streamlit run src/ChatBot.py
 ```

@@ -1,3 +1,5 @@
-streamlit
 openai
 loguru
+joblib
+streamlit
+streamlit-multipage
