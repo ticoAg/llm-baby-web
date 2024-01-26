@@ -41,8 +41,7 @@ def compute_page(st, **state):
 
 
 def landing_page(st):
-    st.title("This is a Multi Page Application")
-    st.write("Feel free to leave give a star in the Github Repo")
+    login_or_register()
 
 
 def footer(st):

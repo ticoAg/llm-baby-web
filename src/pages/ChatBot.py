@@ -11,12 +11,12 @@ from pathlib import Path
 
 sys.path.append(Path(__file__).parent.parent.parent.as_posix())
 import streamlit as st
-
 from openai import OpenAI
-from src.llm_baby_web.utils.tool import args, logger, dumpJS
-from src.llm_baby_web.prompts.common import default_system_prompt
 
-client = OpenAI()
+from src.llm_baby_web.prompts.common import default_system_prompt
+from src.llm_baby_web.utils.tool import args, dumpsJS, logger
+
+_client = OpenAI()
 
 
 def prepare_parameters():
@@ -39,7 +39,11 @@ def prepare_parameters():
     args.frequency_penalty = st.sidebar.slider(
         "Frequency penalty", min_value=0.0, max_value=2.0, value=0.0, step=0.1
     )
-    args.stop = st.sidebar.text_input("Stop words(split with `,`)", value="")
+    stops = st.sidebar.text_input("Stop words(split with `,`)", value="")
+    if stops:
+        args.stop = stops.replace('\\n', '\n').split(",")
+    else:
+        args.stop = []
 
 
 def initlize_system_prompt():
@@ -52,13 +56,13 @@ def initlize_system_prompt():
 
 
 with st.sidebar:
-    client.base_url = st.text_input(
+    _client.base_url = st.text_input(
         "api base", key="openai_api_base", value=os.environ.get("OPENAI_API_BASE", "")
     )
     api_key = st.text_input("api key", key="openai_api_key", value=None)
-    client.api_key = api_key if api_key else os.environ.get("OPENAI_API_KEY", "")
+    _client.api_key = api_key if api_key else os.environ.get("OPENAI_API_KEY", "")
 
-    model_list = [i.id for i in client.models.list().data]
+    model_list = [i.id for i in _client.models.list().data]
     args.model = st.selectbox("Choose your model", model_list, index=0)
 
     st.text_area(
@@ -98,7 +102,8 @@ if prompt := st.chat_input("Your message"):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         full_response = ""
-        for response in client.chat.completions.create(
+        logger.debug(f"{dumpsJS(args.__dict__)}")
+        for response in _client.chat.completions.create(
             **args.__dict__, messages=st.session_state.messages, stream=True
         ):
             if not response.choices[0].delta.content:
@@ -107,9 +112,4 @@ if prompt := st.chat_input("Your message"):
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
     st.session_state.messages.append({"role": "assistant", "content": full_response})
-    logger.debug(f"curr params {dumpJS(args.__dict__)}")
-    logger.debug(f"curr messages {dumpJS(st.session_state.messages)}")
-
-
-# pip install openai --upgrade
-# streamlit run Chatbot.py --server.port
+    logger.debug(f"{dumpsJS(st.session_state.messages)}")
